@@ -60,6 +60,12 @@ class Session:
                 if k in m:
                     entry[k] = m[k]
             out.append(entry)
+
+        # Drop dangling user turns (only for mixed-role histories) so the next
+        # request doesn't re-answer an unfinished prior user message.
+        if any(m.get("role") != "user" for m in out):
+            while out and out[-1].get("role") == "user":
+                out.pop()
         return out
     
     def clear(self) -> None:
